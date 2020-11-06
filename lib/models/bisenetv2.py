@@ -398,6 +398,7 @@ if __name__ == "__main__":
     #
     x = torch.randn(16, 3, 1024, 2048)
     model = BiSeNetV2(n_classes=19)
+    print("Using BisenetV2 with 19 classes!")
     outs = model(x)
     for out in outs:
         print(out.size())

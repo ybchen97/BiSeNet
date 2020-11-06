@@ -22,7 +22,7 @@ import torch.distributed as dist
 from lib.models import model_factory
 from configs import cfg_factory
 from lib.logger import setup_logger
-from lib.cityscapes_cv2 import get_data_loader
+from lib import data_factory
 
 
 
@@ -184,9 +184,9 @@ class MscEvalCrop(object):
 
 
 @torch.no_grad()
-def eval_model(net, ims_per_gpu, im_root, im_anns):
+def eval_model(cfg, net, ims_per_gpu, im_root, im_anns):
     is_dist = dist.is_initialized()
-    dl = get_data_loader(im_root, im_anns, ims_per_gpu, None,
+    dl = data_factory[cfg.dataset].get_data_loader(im_root, im_anns, ims_per_gpu, None,
             None, mode='val', distributed=is_dist)
     net.eval()
 
@@ -194,7 +194,7 @@ def eval_model(net, ims_per_gpu, im_root, im_anns):
     logger = logging.getLogger()
 
     single_scale = MscEvalV0((1., ), False)
-    mIOU = single_scale(net, dl, 19)
+    mIOU = single_scale(net, dl, cfg.n_classes)
     heads.append('single_scale')
     mious.append(mIOU)
     logger.info('single mIOU is: %s\n', mIOU)
@@ -206,13 +206,13 @@ def eval_model(net, ims_per_gpu, im_root, im_anns):
         scales=(1., ),
         lb_ignore=255,
     )
-    mIOU = single_crop(net, dl, 19)
+    mIOU = single_crop(net, dl, cfg.n_classes)
     heads.append('single_scale_crop')
     mious.append(mIOU)
     logger.info('single scale crop mIOU is: %s\n', mIOU)
 
     ms_flip = MscEvalV0((0.5, 0.75, 1, 1.25, 1.5, 1.75), True)
-    mIOU = ms_flip(net, dl, 19)
+    mIOU = ms_flip(net, dl, cfg.n_classes)
     heads.append('ms_flip')
     mious.append(mIOU)
     logger.info('ms flip mIOU is: %s\n', mIOU)
@@ -224,7 +224,7 @@ def eval_model(net, ims_per_gpu, im_root, im_anns):
         scales=(0.5, 0.75, 1.0, 1.25, 1.5, 1.75),
         lb_ignore=255,
     )
-    mIOU = ms_flip_crop(net, dl, 19)
+    mIOU = ms_flip_crop(net, dl, cfg.n_classes)
     heads.append('ms_flip_crop')
     mious.append(mIOU)
     logger.info('ms crop mIOU is: %s\n', mIOU)
@@ -236,7 +236,7 @@ def evaluate(cfg, weight_pth):
 
     ## model
     logger.info('setup and restore model')
-    net = model_factory[cfg.model_type](19)
+    net = model_factory[cfg.model_type](cfg.n_classes)
     #  net = BiSeNetV2(19)
     net.load_state_dict(torch.load(weight_pth))
     net.cuda()
@@ -251,7 +251,7 @@ def evaluate(cfg, weight_pth):
         )
 
     ## evaluator
-    heads, mious = eval_model(net, 2, cfg.im_root, cfg.val_im_anns)
+    heads, mious = eval_model(cfg, net, 2, cfg.im_root, cfg.val_im_anns)
     logger.info(tabulate([mious, ], headers=heads, tablefmt='orgtbl'))
 
 
