@@ -17,12 +17,12 @@ from lib.base_dataset import BaseDataset, TransformationTrain, TransformationVal
 
 
 labels_info = [
-    { "name": "background", "id": 0, "color": [0, 0, 0], "trainId": 255 },       # black
-    { "name": "sky", "id": 1, "color": [0, 0, 255], "trainId": 0 },              # blue
-    { "name": "road", "id": 2, "color": [0, 255, 0], "trainId": 1 },             # green
-    { "name": "midlane", "id": 3, "color": [255, 255, 0], "trainId": 2 },        # yellow
-    { "name": "road_border", "id": 4, "color": [255, 255, 255], "trainId": 3 },  # white
-    { "name": "obstacles", "id": 5, "color": [0, 255, 255], "trainId": 4 }       # aqua (RGB)
+    { "name": "background", "id": 0, "color": [0, 0, 0], "trainId": 0 },       # black
+    { "name": "sky", "id": 1, "color": [0, 0, 255], "trainId": 1 },              # blue
+    { "name": "road", "id": 2, "color": [0, 255, 0], "trainId": 2 },             # green
+    { "name": "midlane", "id": 3, "color": [255, 255, 0], "trainId": 3 },        # yellow
+    { "name": "road_border", "id": 4, "color": [255, 255, 255], "trainId": 4 },  # white
+    { "name": "obstacles", "id": 5, "color": [0, 255, 255], "trainId": 255 }       # aqua (RGB)
 ]
 
 
